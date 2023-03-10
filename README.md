@@ -1,7 +1,7 @@
 ![presentation](https://user-images.githubusercontent.com/86054718/224279306-0ba05400-b1bd-4c33-a9da-96a206bb660d.png)
 
  
-A recreation of Instagram but with the goal to share code. I've created this project a while ago as part of a school assignment, and while it required the use of PHP, Twig, and RedBean.
+A recreation of Instagram but with the goal to share code. I've created this project a while ago as part of a school assignment, it required the use of PHP, Twig, and RedBean.
 
 Looking back, I believe that I could have challenged myself more with this project and explored more advanced techniques or technologies. Nonetheless, I recognize that every project presents an opportunity for growth and improvement, and I will use this experience to push myself further in future projects.
 
