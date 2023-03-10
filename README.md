@@ -5,7 +5,7 @@ A recreation of Instagram but with the goal to share code. I've created this pro
 
 Looking back, I believe that I could have challenged myself more with this project and explored more advanced techniques or technologies. Nonetheless, I recognize that every project presents an opportunity for growth and improvement, and I will use this experience to push myself further in future projects.
 
-# Preview 🎬
+# 🎬 Preview
 
 ![image](https://user-images.githubusercontent.com/86054718/224276022-b340c85e-1ad0-4205-b351-ed81dcba87a8.png)
 ![image2](https://user-images.githubusercontent.com/86054718/224276026-79d1f952-220e-49f6-978a-80aff57eac78.png)
