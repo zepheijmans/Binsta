@@ -1,0 +1,9 @@
+.avatar-container {
+    position: relative;
+    margin-left: 2rem;
+    height: 100%;
+    width: 100px;
+
+    @import "./avatar-container/avatar.scss";
+    @import "./avatar-container/follow-status.scss";
+}

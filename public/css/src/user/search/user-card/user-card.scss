@@ -1,0 +1,19 @@
+.user-card {
+    display: flex;
+    position: relative;
+    height: 150px;
+    border-radius: $card-border-radius;
+    align-items: center;
+    color: white;
+    transition: .2s;
+
+    &:hover {
+        transform: scale(1.01);
+    }
+
+    @import "./card-bg.scss";
+    @import "./avatar-container.scss";
+    @import "./about.scss";
+    @import "./actions.scss";
+    @import "./bio.scss";
+}

@@ -1,0 +1,14 @@
+{% extends "layouts/app.twig" %}
+
+{% block title %}Error{% endblock %}
+{% block head %}
+    {{ parent() }}
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <div class="alert alert-danger">
+            <strong>{{ error_message }}</strong>
+            <p class="mb-0">Return to the <a href="/">home page</a>.</p>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,13 @@
+div.modal-body::-webkit-scrollbar {
+    width: 15px;
+}
+
+.modal-content {
+    background-clip: unset;
+    border: transparent;
+}
+
+.modal-header,
+.modal-footer {
+    border-color: transparent;
+}

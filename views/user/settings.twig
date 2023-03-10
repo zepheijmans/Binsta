@@ -1,0 +1,343 @@
+{% extends "layouts/profile.twig" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block profilebefore %}
+<div class="modal fade settings-modal" id="pageModal" tabindex="-1" aria-labelledby="pageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="pageModalLabel">Label</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" data-bs-dismiss="modal">Close</button>
+                <button id="save" type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block profilebody %}
+<div class="profile-header edit">
+    <img id="profile-banner" src="{{me.banner}}"/>
+    <a id="profile-banner-upload" href="javascript:void(0)" onclick="changeBanner()">
+        <i class='bx bx-upload'></i>
+    </a>
+</div>
+<div class="avatar-container edit">
+    <img class="avatar" src="{{user.avatar ?: '/images/user.png'}}" alt="Avatar"/>
+    <a id="avatar-container-upload" href="javascript:void(0)" onclick="changePicture()">
+        <i class='bx bx-camera'></i>
+    </a>
+</div>
+<ol class="breadcrumb">
+    <li>
+        <a href="/">
+            <span>Home</span>
+        </a>
+    </li>
+    <li>
+        <a href="/user/profile/{{user.id}}">
+            <span>{{ user.username }}</span>
+        </a>
+    </li>
+    <li class="active">
+        <span>Settings</span>
+    </li>
+</ol>
+<div class="card-body profile-settings row">
+    <div class="col-md-5">
+        <ul class="list-group">
+            <a class="list-group-item" onclick="changePicture()">Change Picture</a>
+            <a class="list-group-item" onclick="changeBanner()">Change Banner</a>
+            <a class="list-group-item" onclick="changeEmail()">Change Email</a>
+            <a class="list-group-item" onclick="changePassword()">Change Password</a>
+        </ul>
+    </div>
+    <form class="col-md-7" method="post" id="updateUser" name="updateUser">
+        <label for="fullname">Full Name</label>
+        <input id="fullname" class="form-control" placeholder="Full Name" value="{{me.fullname}}"></input>
+
+        <label for="aboutme" class="mt-2">About me ({{me.bio|length}}/1000)</label>
+        <textarea id="aboutme" class="form-control" placeholder="About me">{{me.bio}}</textarea>
+
+        <label class="mt-2">Preferences</label>
+        <ul class="list-group switches">
+            <div class="form-check form-switch list-group-item">
+                <label class="form-check-label" for="darktheme">Dark theme</label>
+                <input class="form-check-input" type="checkbox" role="switch" id="darktheme" {{me.settings.darktheme ? 'checked'}}>
+            </div>
+            <div class="form-check form-switch list-group-item">
+                <label class="form-check-label" for="reducedmotion">Reduced motion</label>
+                <input class="form-check-input" type="checkbox" role="switch" id="reducedmotion" {{me.settings.reducedmotion ? 'checked'}}>
+            </div>
+        </ul>
+
+        <div class="mt-3">
+            <button id="save" type="button" class="btn btn-outline-dark w-100">Save</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block profileafter %}
+<ul class="dropdown-menu" id="pageDropdown">
+    <li><a class="dropdown-item" href="#">Upload Picture</a></li>
+    <li><a class="dropdown-item" href="#">Remove Picture</a></li>
+</ul>
+{% endblock %}
+
+{% block script %}
+<script>
+    const editUserForm = $('#updateUser');
+    const saveUserBtn = editUserForm.find('#save');
+
+    function post(btn, url, postData, successCallback) {
+        if (btn) showBtnLoad(btn);
+
+        let ajaxData = {
+            url: url,
+            type: "POST",
+            data: postData,
+            success: function (data) {
+                console.log(data);
+                if (btn) showBtnLoad(btn, false);
+
+                if (data.status == 'success') {
+                    successCallback(data);
+                } else {
+                    addToast("Error", data.error_message ?? "Error", "danger");
+                }
+            },
+            error: function (response, textStatus, errorMessage) {
+                console.log(response, textStatus, errorMessage);
+                if (btn) showBtnLoad(btn, false);
+                addToast(textStatus, typeof(errorMessage) == "string" ? errorMessage : textStatus, "danger");
+            }
+        }
+
+        if (postData instanceof FormData) {
+            ajaxData['cache'] = false;
+            ajaxData['processData'] = false;
+            ajaxData['contentType'] = false;
+        }
+
+        $.ajax(ajaxData);
+    }
+
+    editUserForm.find('#aboutme').keydown(function() {
+        const length = $(this).val().length;
+        let labelText = `About me (${length}/1000)`;
+        labelText = length > 1000 ? `<span style="color: red">${labelText}</span>` : labelText;
+        editUserForm.find('label[for=aboutme]').html(labelText);
+    })
+
+    saveUserBtn.unbind('click');
+    saveUserBtn.on('click', function() {
+        let settings = {};
+        $('.switches .form-check-input').each(function() {
+            settings[$(this).attr('id')] = $(this)[0].checked;
+        })
+
+        post(
+            saveUserBtn,
+            "/user/settingsPost",
+            {
+                fullname: editUserForm.find('#fullname').val(),
+                bio: editUserForm.find('#aboutme').val(),
+                settings: JSON.stringify(settings)
+            },
+            function(data) {
+                Object.keys(settings).map(setting => {
+                    localStorage.setItem(setting, settings[setting]);
+                    onStorageUpdate();
+                })
+                addToast("Success", "Changes saved successfully.", "success");
+            }
+        );
+    });
+
+    // Modal
+    const pageModal = $('#pageModal');
+    const saveBtn = pageModal.find('#save');
+
+    // Change Picture
+    const allowedFileTypes = [
+        "image/gif",
+        "image/jpeg",
+        "image/pjpeg",
+        "image/png"
+    ];
+
+    const changePictureBody = `
+        <div class="row">
+            <div class="avatar-container col-md-6">
+                <img src="{{user.avatar}}" alt="Avatar" class="avatar"/>
+            </div>
+            <form class="list-group p-4 col-md-6" method="post" id="updateAvatar" name="updateAvatar">
+                <label for="picture-upload">
+                    <span class="list-group-item">Upload New Picture</a>
+                </label>
+                <input id="picture-upload" name="picture-upload" type="file" size="50">
+
+                <a href="#" class="list-group-item">Remove Picture</a>
+            </form>
+        </div>
+    `
+
+    function changePicture() {
+        pageModal.find('.modal-title').html('Change Picture');
+        pageModal.find('.modal-body').html(changePictureBody);
+
+        // Image Upload
+        pageModal.find('#picture-upload').change(function() {
+            const picture = $(this)[0].files[0];
+            if (!picture) return;
+            if (!allowedFileTypes.includes(picture.type)) return addToast("Invalid File Type", "Type must be of image.", "danger");
+            pageModal.find('.avatar-container img').attr('src', URL.createObjectURL(picture));
+        });
+
+        // Save Picture
+        saveBtn.unbind('click');
+        saveBtn.on('click', function() {
+            post(
+                saveBtn,
+                "/user/updateAvatar",
+                new FormData($('#updateAvatar')[0]),
+                function() {
+                    $('.avatar').attr('src', URL.createObjectURL($('#picture-upload')[0].files[0]));
+                    addToast("Success", "Picture changed successfully.", "success");
+                    pageModal.modal('hide');
+                }
+            );
+        })
+
+        pageModal.modal('show');
+    }
+
+    // Change Banner
+    const changeBannerBody = `
+        <div class="row">
+            <form class="list-group p-4 col-md-6" method="post" id="updateBanner" name="updateBanner">
+                <label for="picture-upload">
+                    <span class="list-group-item">Upload New Banner</a>
+                </label>
+                <input id="picture-upload" name="picture-upload" type="file" size="50">
+
+                <a href="#" class="list-group-item">Remove Banner</a>
+            </form>
+        </div>
+    `
+
+    function changeBanner() {
+        pageModal.find('.modal-title').html('Change Banner');
+        pageModal.find('.modal-body').html(changeBannerBody);
+
+        // Image Upload
+        pageModal.find('#picture-upload').change(function() {
+            const picture = $(this)[0].files[0];
+            if (!picture) return;
+            if (!allowedFileTypes.includes(picture.type)) return addToast("Invalid File Type", "Type must be of image.", "danger");
+            pageModal.find('profile-banner').attr('src', URL.createObjectURL(picture));
+        });
+
+        // Save Picture
+        saveBtn.unbind('click');
+        saveBtn.on('click', function() {
+            post(
+                saveBtn,
+                "/user/updateBanner",
+                new FormData($('#updateBanner')[0]),
+                function() {
+                    $('#profile-banner').attr('src', URL.createObjectURL($('#picture-upload')[0].files[0]));
+                    addToast("Success", "Banner changed successfully.", "success");
+                    pageModal.modal('hide');
+                }
+            );
+        })
+
+        pageModal.modal('show');
+    }
+
+    // Change Email
+    const changeEmailBody = `
+        <div class="mx-auto row">
+            <span class="col-md-5 p-0">
+                Verify your email after changing it
+            </span>
+            <form class="mx-auto col-md-7 row gy-2 mt-md-0 p-0 ps-md-2" method="post" id="updateAvatar" name="updateAvatar">
+                <input type="email" id="email" name="email" class="form-control mt-0" placeholder="New email"></input>
+                <input type="email" id="confirmEmail" name="confirmEmail" class="form-control" placeholder="Confirm new email"></input>
+            </form>
+        </div>
+    `
+
+    function changeEmail() {
+        pageModal.find('.modal-title').html('Change Email');
+        pageModal.find('.modal-body').html(changeEmailBody);
+
+        // Save Email
+        saveBtn.unbind('click');
+        saveBtn.on('click', function() {
+            post(
+                saveBtn,
+                "/user/updateEmailPost",
+                {
+                    email: pageModal.find('#email').val(),
+                    confirmEmail: pageModal.find('#confirmEmail').val()
+                },
+                function() {
+                    addToast("Success", "Email changed successfully.", "success");
+                    pageModal.modal('hide');
+                }
+            );
+        });
+
+        pageModal.modal('show');
+    }
+
+    // Change Password
+    const changePasswordBody = `
+        <div class="mx-auto row">
+            <ul class="list-group col-md-5 p-0">
+                <a class="list-group-item"">Reset Password</a>
+            </ul>
+            <form class="mx-auto col-md-7 row gy-2 mt-md-0 p-0 ps-md-2" method="post" id="updateAvatar" name="updateAvatar">
+                <input type="password" id="password" class="form-control mt-0" placeholder="Current password"></input>
+                <input type="password" id="newPassword" class="form-control" placeholder="New password"></input>
+                <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm new password"></input>
+            </form>
+        </div>
+    `
+
+    function changePassword() {
+        pageModal.find('.modal-title').html('Change Password');
+        pageModal.find('.modal-body').html(changePasswordBody);
+
+        // Save Password
+        saveBtn.unbind('click');
+        saveBtn.on('click', function() {
+            post(
+                saveBtn,
+                "/user/updatePasswordPost",
+                {
+                    password: pageModal.find('#password').val(),
+                    newPassword: pageModal.find('#newPassword').val(),
+                    confirmPassword: pageModal.find('#confirmPassword').val()
+                },
+                function() {
+                    addToast("Success", "Password changed successfully.", "success");
+                    pageModal.modal('hide');
+                }
+            );
+        });
+
+        pageModal.modal('show');
+    }
+</script>
+{% endblock %}

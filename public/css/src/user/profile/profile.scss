@@ -1,0 +1,21 @@
+@import "./profile-comments.scss";
+
+.profile {
+    @import "./breadcrumb.scss";
+    @import "./avatar-container.scss";
+    @import "./list-group-item.scss";
+    @import "./list-group-switches.scss";
+    @import "./profile-about.scss";
+    @import "./profile-actions.scss";
+    @import "./profile-header.scss";
+    @import "./profile-meta.scss";
+    @import "./profile-settings.scss";
+    @import "./profile-stats.scss";
+}
+
+.profile input#fullname,
+.profile textarea#aboutme {
+    border-radius: 25px;
+    background: $gray-200 !important;
+    border: unset !important;
+}

@@ -1,0 +1,23 @@
+.user-search {
+    margin: 0 auto;
+
+    @include media-breakpoint-up(xl) {
+        & {
+            width: 1270px;
+        }
+    }
+
+    @include media-breakpoint-up(lg) {
+        & {
+            width: 970px;
+        }
+    }
+
+    @include media-breakpoint-up(sm) {
+        & {
+            width: 970px;
+        }
+    }
+
+    @import "./user-card/user-card.scss";
+}

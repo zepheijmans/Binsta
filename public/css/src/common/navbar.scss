@@ -1,0 +1,61 @@
+.navbar {
+    background: $white;
+
+    .navbar-brand {
+        padding: 0;
+        font-family: Courgette-Regular;
+        font-size: 24px;
+    }
+
+    .avatar {
+        margin-top: 5px;
+        width: 30px;
+        height: 30px;
+    }
+
+    .navbar-search {
+        width: 300px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
+        i {
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+            position: absolute;
+            font-size: 1.4rem;
+            color: $text-muted;
+        }
+
+        input {
+            text-indent: 30px;
+            transition: .4s;
+            border: none;
+            border-radius: 25px;
+            background: $gray-200;
+
+            &:focus {
+                text-indent: 35px;
+            }
+        }
+    }
+
+    @include media-breakpoint-down(sm) {
+        .navbar-search {
+            width: 200px;
+        }
+    }
+
+    .nav-link {
+        i {
+            margin-right: 1rem;
+            transform: scale(2);
+        }
+    }
+
+    .offcanvas {
+        z-index: $zindex-modal;
+    }
+}

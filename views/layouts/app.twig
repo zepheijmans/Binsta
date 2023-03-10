@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        {% block head %}
+            <meta charset="UTF-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+            <title>Binsta · {% block title %}{% endblock %}</title>
+
+            <link rel="stylesheet" href="/css/app.min.css"/>
+
+            <script src="/libs/jquery-3.6.1/jquery.min.js"></script>
+            <script src="/js/app-load.js"></script>
+        {% endblock %}
+    </head>
+    <body>
+        <div id="progress-bar" aria-valuenow="0"></div>
+
+        <!-- Navbar -->
+        {% if (user) %}
+        <nav class="navbar navbar-expand-lg">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">Binsta</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-search" role="search">
+                    <i class='bx bx-search'></i>
+                    <input class="form-control" type="search" id="search" name="search" placeholder="Search" aria-label="Search">
+                </div>
+                <div class="d-none d-lg-block">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="/" data-bs-toggle="tooltip" data-bs-title="Home" data-bs-placement="bottom"><i class='bx bxs-home'></i></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="/post/create" data-bs-toggle="tooltip" data-bs-title="Post" data-bs-placement="bottom"><i class='bx bx-message-square-add'></i></a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a role="button" data-bs-toggle="dropdown" aria-expanded="false" href="#">
+                                <img class="avatar ms-auto" src="{{user.avatar}}" alt="Your Avatar Image"/>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-lg-end">
+                                <li><a class="dropdown-item" href="/user/profile"><i class='bx bxs-user'></i> Profile</a></li>
+                                <li><a class="dropdown-item" href="/post/forks"><i class='bx bx-git-repo-forked'></i> Forks</a></li>
+                                <li><a class="dropdown-item" href="/user/settings"><i class='bx bxs-cog'></i> Settings</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="/user/logout"><i class='bx bx-arrow-to-right'></i> Logout</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <div class="offcanvas offcanvas-end d-md-block d-lg-none" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+                    <div class="offcanvas-header">
+                        <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Navigation</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    </div>
+                    <div class="offcanvas-body">
+                        <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
+                            <li class="nav-item">
+                                <a class="nav-link active" aria-current="page" href="/">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/post/create">Post</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/user/profile">Profile</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/user/settings">Settings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/user/logout">Logout</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        {% endif %}
+        <!-- End Navbar -->
+
+        <div id="page-load" class="p-4 w-100 text-center"><div class="spinner-border text-dark" role="status"><span class="visually-hidden">Loading...</span></div></div>
+        <div id="page-content" class="mt-md-4">{% block content %}{% endblock %}</div>
+
+        <!-- Toast Container -->
+        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+
+        </div>
+        <!-- End Toast Container -->
+
+        <!-- Confirmation Modal -->
+        <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-md modal-fullscreen-md-down modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="confirmModalLabel">Confirmation</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" data-bs-dismiss="modal" aria-label="Close" id="confirm">Confirm</button>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Confirmation Modal -->
+
+        <div id="footer">{% block footer %}{% endblock %}</div>
+
+        <script src="/libs/bootstrap-5.0.2-dist/js/bootstrap.bundle.min.js"></script>
+        <script src="/js/app.js"></script>
+
+        {% block script %}{% endblock %}
+    </body>
+</html>

@@ -1,0 +1,11 @@
+.list-group.switches {
+    .list-group-item {
+        background: none;
+        border-bottom: 1px solid $gray-200;
+
+        .form-check-input {
+            position: absolute;
+            right: 1rem;
+        }
+    }
+}

@@ -1,0 +1,23 @@
+.profile-about {
+    margin-top: 4rem;
+    text-align: center;
+
+    #fullname {
+        font-size: 32px;
+        font-weight: 300;
+    }
+
+    #username {
+        font-size: 15px;
+        font-weight: 500;
+        text-transform: uppercase;
+
+        &:before {
+            content: '@';
+        }
+    }
+
+    p {
+        margin-bottom: .5rem;
+    }
+}

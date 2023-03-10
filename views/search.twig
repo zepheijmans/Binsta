@@ -1,0 +1,84 @@
+{% extends "layouts/app.twig" %}
+
+{% block title %}Search{% endblock %}
+
+{% block head %}{{ parent() }}{% endblock %}
+
+{% block content %}
+<div class="container user-search">
+    <div class="row gy-4">
+        {% for user in users %}
+            <div class="col-md-12 user-card">
+                <div class="card-bg">
+                    <img src="{{user.banner}}" alt="Background">
+                    {% if user.banner_is_custom %}
+                        <div class="darken-bg"></div>
+                    {% endif %}
+                </div>
+                <div class="avatar-container">
+                    <a href="/user/profile/{{user.id}}">
+                        {% if user.avatar %}
+                            <img class="avatar" src="/uploads/avatars/{{user.avatar}}" alt="Avatar"/>
+                        {% else %}
+                            <img class="avatar" src="/images/user.png" alt="Avatar"/>
+                        {% endif %}
+
+                        <i class='bx bxs-heart {{user.follow and user.followedby ? '' : 'd-none'}}' id="follow-status" data-bs-toggle="tooltip" data-bs-title="Mutual"></i>
+                    </a>
+                </div>
+                <div class="about">
+                    {% if user.fullname %}
+                        <a href="/user/profile/{{user.id}}" id="fullname" class="text-white">{{user.fullname}}</a>
+                    {% endif %}
+
+                    <div class="stats">
+                        <a href="/user/profile/{{user.id}}" id="username" class="text-white">@{{user.username}}</a>
+                        <span class="text-white mb-0"><i class='bx bx-time-five' ></i> Joined <span class="account-created">{{user.date_joined}}</span></span>
+                        <span class="account-post-count"><i class='bx bx-user'></i> {{user.following|length}} following</span>
+                        <span class="account-message-count"><i class='bx bx-group'></i> {{user.followers|length}} followers</span>
+                    </div>
+
+                    <a class="actions" href="javascript:void(0)" data-bs-toggle="dropdown" aria-expanded="false"><i class='bx bx-dots-vertical-rounded'></i></a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item account-connect" href="javascript:void(0)" data-userid={{user.id}} data-username={{user.username}} data-followedby={{user.followedby}}>{{user.follow ? 'Unfollow' : 'Follow'}}</a></li>
+                    </ul>
+
+                    <p class="bio">{{user.bio}}</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    $('.account-created').each(function() {
+        $(this).html(niceTime(Date.now()/1000 - $(this).html()) + " ago");
+    })
+
+    function follow(followBtn, id, username, followed) {
+        ajaxSend(`/user/follow?id=${id}`, 'POST', null,
+            function(response) {
+                if (response.follow) {
+                    followBtn.html("Unfollow");
+                    if (followed) {
+                        followBtn.parent().parent().find('.avatar-container a i').removeClass('d-none');
+                    }
+                    addToast("Follow", `Now following @${username}`, "default");
+                    return;
+                }
+                followBtn.html("Follow");
+                followBtn.parent().parent().find('.avatar-container a i').addClass('d-none');
+                addToast("Follow", `Unfollowed @${username}`, "default");
+            }
+        );
+    }
+
+    $('.account-connect').each(function() {
+        $(this).click(function() {
+            follow($(this), $(this).attr('data-userid'), $(this).attr('data-username'), $(this).attr('data-followedby'))
+        })
+    })
+</script>
+{% endblock %}

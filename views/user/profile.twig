@@ -1,0 +1,235 @@
+{% extends "layouts/profile.twig" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+{% endblock %}
+
+{% block profilebody %}
+    <div class="profile-header">
+        <img id="profile-banner" src="{{profile.banner}}"/>
+    </div>
+    <div class="avatar-container">
+        <img class="avatar" src="{{profile.avatar ? profile.avatar : '/images/user.png'}}" alt="Avatar"/>
+        {% if (profile.id != user.id) %}
+            <a id="follow" class="action float-end p-1 px-2 pe-2 me-3 {{follow ? 'active' : ''}} {{follow and follower ? 'mutual'}}" href="javascript:void(0)" onClick="follow()" follower={{follow and follower}}>
+                <i class='bx {{follow and follower ? 'bxs-heart' : follow ? 'bx-link' : 'bx-plus'}}'></i>
+            </a>
+        {% endif %}
+    </div>
+    <div class="profile-actions">
+        <a class="action float-end p-1 px-2 pe-2 me-3" data-bs-toggle="dropdown" aria-expanded="false"><i class='bx bx-dots-horizontal-rounded'></i></a>
+        <ul class="dropdown-menu dropdown-menu-end">
+            {% if profile.id == user.id %}
+                <li><a class="dropdown-item" href="/user/settings">Edit</a></li>
+            {% else %}
+                <li><a class="dropdown-item dropdown-follow" href="javascript:void(0)" onClick="follow()">{{follow ? 'Unfollow' : 'Follow'}}</a></li>
+                <li><a class="dropdown-item" href="javascript:void(0)">Block</a></li>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="profile-about">
+        <h1 id="fullname" class="text-muted">{{profile.fullname ?: profile.username}}</h1>
+        <h2 id="username" class="text-dark">{{profile.username}}</h2>
+        <p id="bio" class="w-75 mx-auto">{{profile.bio}}</p>
+    </div>
+    <div class="profile-stats">
+        <span id="following"><a id="following-count" class="fw-bold" href="javascript:void(0)" onClick="showFollowing()">{{count_following}}</a> Following</span>
+        <span id="followers"><a id="follower-count" class="fw-bold" href="javascript:void(0)" onClick="showFollowers()">{{count_followers}}</a> Followers</span>
+        <span id="posts"><a id="follower-count" class="fw-bold" href="/post/index/{{profile.id}}">{{count_posts}}</a> Posts</span>
+    </div>
+    <div class="profile-meta">
+        <span class="text-muted"><i class='bx bx-calendar pb-0'></i> Joined <span id="join-date">{{profile.date_joined}}</span></span>
+    </div>
+{% endblock %}
+
+{% block profilecontent %}
+<div class="card mt-3 mb-4">
+    <div class="card-body profile-comments-container">
+        <h3>Profile comments</h3>
+        <div class="profile-comments">
+            <p id="no-comments">No comments found.</p>
+        </div>
+        <div class="post-comment flex-grow-1">
+            <input type="text" name="comment" placeholder="Post a comment..." id="comment"></input>
+            <a class="post-comment-submit" href="javascript:void(0)" onClick="postComment()">Post</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block profileafter %}
+<div class="modal fade" id="pageModal" tabindex="-1" aria-labelledby="pageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md modal-fullscreen-md-down modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="pageModalLabel">Label</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                
+            </div>
+            <div class="modal-footer">
+                
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        const pageModal = $('#pageModal');
+        const pageModalTitle = pageModal.find('.modal-title');
+        const pageModalBody = pageModal.find('.modal-body');
+        const pageModalFooter = pageModal.find('.modal-footer');
+
+        // Format join date
+        const joinDate = $('#join-date');
+        joinDate.html(niceTime(Date.now()/1000 - parseInt(joinDate.html())) + " ago");
+
+        // Follow
+        function follow() {
+            ajaxSend('/user/follow?id=' + {{profile.id}}, 'POST', null,
+                function(response) {
+                    const follower = $('#follow').attr('follower');
+
+                    if (response.follow) {
+                        $('#follow').addClass(follower ? "mutual" : "active");
+                        $('#follow i').removeClass("bx-plus");
+                        $('#follow i').addClass(follower ? "bxs-heart" : "bx-link");
+                        $('.dropdown-follow').html("Unfollow");
+                        addToast("Follow", "Now following @{{profile.username}}", "default");
+                        return;
+                    }
+
+                    $('#follow').removeClass(follower ? "mutual" : "active");
+                    $('#follow i').removeClass(follower ? "bxs-heart" : "bx-link");
+                    $('#follow i').addClass("bx-plus");
+                    $('.dropdown-follow').html("Follow");
+                    addToast("Follow", "Unfollowed @{{profile.username}}", "default");
+                }
+            );
+        }
+
+        function populateList(url) {
+            ajaxSend(url, 'GET', null,
+                function(response) {
+                    pageModalBody.html(`<div class="user-list"></div>`)
+                    Object.values(response.list).map((user) => {
+                        pageModalBody.find('.user-list').append(`
+                            <div class="user-list-item">
+                                <img class="avatar" src="${user.avatar}">
+                                <a href="/user/profile/${user.id}">@${user.username}</a>
+                            </div>
+                        `)
+                    })
+                }
+            );
+        }
+
+        function showFollowing() {
+            pageModal.modal('show');
+            pageModalTitle.html('Following');
+            pageModalBody.html('');
+            populateList('/user/getFollowing/' + {{profile.id}})
+        }
+
+        function showFollowers() {
+            pageModal.modal('show');
+            pageModalTitle.html('Followers');
+            pageModalBody.html('');
+            populateList('/user/getFollowers/' + {{profile.id}})
+        }
+
+        // Comments
+        const profileComments = $('.profile-comments');
+        let comments = 0;
+
+        function markupComment(authorID, authorAvatar, authorUsername, comment, commentTime) {
+            return `
+                <div class="comment">
+                    <img class="avatar" src="${authorAvatar}">
+                    <div class="comment-body">
+                        <a href="/user/profile/${authorID}">@${authorUsername}</a>
+                        <p>${comment}</p>
+                        <div class="comment-meta">
+                            <span class="text-muted">${commentTime}</span>
+                        </div>
+                    </div>
+                </div>
+            `
+        }
+
+        function getComments(offset, amount = 5) {
+            ajaxSend('/user/getComments?id=' + {{profile.id}}, 'POST',
+                {
+                    'offset': offset,
+                    'amount': amount
+                },
+                function(response) {
+                    const fetchedComments = Object.keys(response.comments).length;
+
+                    if (fetchedComments > 0) $('#no-comments').remove();
+
+                    Object.values(response.comments).map(comment => {
+                        comment.date_posted = niceTime(Date.now()/1000 - comment.date_posted) + " ago";
+                        profileComments.append(markupComment(
+                            comment.author,
+                            response.comments_meta[comment.author].avatar,
+                            response.comments_meta[comment.author].username,
+                            comment.comment,
+                            comment.date_posted
+                        ));
+                        comments++;
+                    })
+
+                    profileComments.find('#comments-load').remove();
+
+                    if (fetchedComments < amount) {
+                        profileComments.unbind('scroll');
+                    } else if (comments == amount) {
+                        // First time initialize scroll event
+                        profileComments.scroll(function() {
+                            if (Math.ceil(profileComments.scrollTop() + profileComments.innerHeight()) >= profileComments[0].scrollHeight - 50) {
+                                // Show loading indicator
+                                profileComments.append(`<div class="text-center" id="comments-load"><div class="spinner-border text-dark" role="status"><span class="visually-hidden">Loading...</span></div></div>`)
+                                
+                                // Fetch new comments
+                                getComments(comments, config.fetch_amount);
+                            }
+                        });
+                    }
+                }
+            );
+        }
+
+        function postComment() {
+            const comment = $('.post-comment #comment').val();
+            ajaxSend('/user/postComment', 'POST',
+                {
+                    'id': {{profile.id}},
+                    'comment': comment
+                },
+                function (response) {
+                    const time = niceTime(Date.now()/1000 - comment.date_posted) + " ago";
+                    profileComments.prepend(markupComment(
+                        {{user.id}},
+                        `{{user.avatar}}`,
+                        `{{user.username}}`,
+                        comment,
+                        time
+                    ));
+                    $('.post-comment #comment').val('');
+                    comments++;
+                },
+            );
+        }
+
+        getComments(0, config.fetch_amount);
+    </script>
+
+    <script src="/libs/highlight.js-11.6.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+{% endblock %}

@@ -1,0 +1,135 @@
+.post {
+    #actions {
+        @include media-breakpoint-up(md) {
+            & {
+                top: 1rem;
+                right: 1rem;
+                position: absolute;
+            }
+        }
+
+        @include media-breakpoint-down(xl) {
+            & {
+                gap: 1rem;
+                padding-bottom: 1rem;
+                margin: 0 auto;
+                position: relative;
+                width: 100% !important;
+            }
+        }
+
+        select {
+            border-radius: 25px;
+            border: unset;
+            background: $gray-200;
+        }
+    }
+
+    .post-content::-webkit-scrollbar {
+        width: 15px !important;
+    }
+
+    .post-content::-webkit-scrollbar-track,
+    .post-content::-webkit-scrollbar-corner {
+        background: rgb(32, 32, 32);
+    }
+
+    .post-content::-webkit-scrollbar-thumb {
+        background: rgb(64, 64, 64);
+    }
+
+    .post-content::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+    .post-content {
+        max-height: 300px;
+        overflow: auto;
+
+        @include media-breakpoint-down(md) {
+            & {
+                max-height: 200px;
+            }
+        }
+
+        pre {
+            min-width: 100% !important;
+            margin: 0px;
+            width: fit-content;
+
+            code {
+                border-radius: unset !important;
+            }
+        }
+    }
+
+    #username {
+        color: black;
+        font-weight: 600;
+    }
+
+    .stats {
+        margin-top: 1rem;
+        display: flex;
+        position: relative;
+
+        .stat {
+
+            i,
+            span {
+                transition: .2s;
+                cursor: pointer;
+            }
+
+            i {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: 1.4rem;
+                cursor: pointer;
+            }
+
+            span {
+                margin-left: 1rem;
+
+                #count {
+                    font-weight: 600;
+                }
+            }
+
+            &.active {
+                i {
+                    color: $primary;
+
+                    &:hover {
+                        color: black;
+                    }
+                }
+            }
+
+            &:hover {
+
+                i,
+                span {
+                    color: $primary !important;
+                }
+            }
+        }
+    }
+
+    .caption {
+        margin-top: .5rem;
+
+        a {
+            font-weight: 600;
+        }
+
+        span {
+            margin-left: .4rem;
+        }
+
+        .post-created {
+            margin-top: .4rem;
+        }
+    }
+}

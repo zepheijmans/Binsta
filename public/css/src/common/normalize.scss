@@ -1,0 +1,158 @@
+body {
+    min-height: 100vh;
+}
+
+body[theme="dark"] {
+    $body-bg: #1d2021;
+    $item-bg: rgb(35, 38, 39);
+    $card-bg: #181a1b;
+    $text: #d1cdc7;
+
+    & {
+        background-color: $body-bg;
+    }
+
+    i,
+    span,
+    label,
+    a,
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    .modal,
+    .user-list-item a {
+        color: $text;
+    }
+
+    .navbar {
+        background: rgb(24, 26, 27);
+    }
+
+    .btn-outline-dark {
+        border-color: $text;
+        color: $text;
+    }
+
+    .btn-outline-dark:hover {
+        background: $text;
+        color: black;
+    }
+
+    .toast-title,
+    .toast-message {
+        color: unset;
+    }
+
+    select,
+    option,
+    .card-title,
+    .text-dark {
+        color: $text !important;
+    }
+
+    .dropdown-menu,
+    textarea:not(code-input textarea),
+    .list-group-item,
+    .post-comment {
+        background: $item-bg;
+        color: $text;
+    }
+
+    select,
+    input,
+    textarea#aboutme,
+    input#fullname {
+        background: $item-bg !important;
+        color: $text !important;
+    }
+
+    .list-group.switches .list-group-item {
+        border-bottom: 1px solid $item-bg !important;
+    }
+
+    .form-check-input {
+        border-color: $red;
+    }
+
+    .form-check-input:checked {
+        border-color: greenyellow;
+        background: $green !important;
+    }
+
+    .card,
+    .modal-content {
+        background: $card-bg;
+    }
+
+    .btn-close {
+        filter: invert(100);
+    }
+
+    #profile-banner-upload {
+        background: linear-gradient(rgba(0, 0, 0, 0.25), rgba(255, 255, 255, 0.25)) !important;
+    }
+}
+
+body[reducedmotion="true"] {
+    * {
+        transition: 0s !important;
+    }
+}
+@media (prefers-reduced-motion) {
+    * {
+        transition: 0s !important;
+    }
+}
+
+a {
+    text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #333;
+}
+
+body::-webkit-scrollbar {
+    width: 7px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgb(100, 100, 100);
+    border-radius: $card-border-radius;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+@include media-breakpoint-down(xl) {
+    .col-md-6 {
+        width: 75% !important;
+    }
+}
+
+.btn-primary {
+    color: white;
+}
+
+.form-control {
+    background: $gray-100;
+}
+
+#page-content {
+    display: none;
+}

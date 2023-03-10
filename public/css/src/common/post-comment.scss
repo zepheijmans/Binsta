@@ -1,0 +1,22 @@
+.post-comment {
+    display: flex;
+    padding: .75rem;
+    background-color: $card-bg;
+    border-radius: 25px;
+
+    input {
+        width: 100%;
+        border: none;
+        background: transparent;
+
+        &:focus {
+            border: none;
+            outline: none;
+        }
+    }
+
+    .post-comment-submit {
+        float: right;
+        cursor: pointer;
+    }
+}

@@ -1,0 +1,63 @@
+code-input pre {
+    width: 100%;
+    height: 100%;
+}
+
+code {
+    width: 100%;
+    font-family: Hack;
+    border-radius: $card-border-radius;
+    overflow: hidden !important;
+}
+
+code-input textarea::-webkit-scrollbar {
+    width: 15px !important;
+}
+
+.code[theme="default"] {
+    @include meta.load-css("../../../libs/highlight.js-11.6.0/styles/default.min.css");
+}
+
+.code[theme="dark"] {
+    @include meta.load-css("../../../libs/highlight.js-11.6.0/styles/dark.min.css");
+}
+
+.code[theme="monokai"] {
+    @include meta.load-css("../../../libs/highlight.js-11.6.0/styles/monokai.min.css");
+}
+
+.code[theme="monokai-sublime"] {
+    @include meta.load-css("../../../libs/highlight.js-11.6.0/styles/monokai-sublime.min.css");
+}
+
+.code[theme="atom-one-dark"] {
+    @include meta.load-css("../../../libs/highlight.js-11.6.0/styles/atom-one-dark.min.css");
+}
+
+.code[theme="atom-one-light"] {
+    @include meta.load-css("../../../libs/highlight.js-11.6.0/styles/atom-one-light.min.css");
+}
+
+.code[theme="brown-paper"] {
+    @include meta.load-css("../../../libs/highlight.js-11.6.0/styles/brown-paper.min.css");
+}
+
+.code[theme="codepen-embed"] {
+    @include meta.load-css("../../../libs/highlight.js-11.6.0/styles/codepen-embed.min.css");
+}
+
+.code[theme="github"] {
+    @include meta.load-css("../../../libs/highlight.js-11.6.0/styles/github.min.css");
+}
+
+.code[theme="night-owl"] {
+    @include meta.load-css("../../../libs/highlight.js-11.6.0/styles/night-owl.min.css");
+}
+
+.code[theme="rainbow"] {
+    @include meta.load-css("../../../libs/highlight.js-11.6.0/styles/rainbow.min.css");
+}
+
+.code[theme="vs"] {
+    @include meta.load-css("../../../libs/highlight.js-11.6.0/styles/vs.min.css");
+}

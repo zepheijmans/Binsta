@@ -1,0 +1,23 @@
+.profile-stats {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+    gap: 1rem;
+
+    span {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        text-transform: uppercase;
+        color: $gray-600;
+        font-size: 14px;
+
+        a {
+            width: 100%;
+            font-size: 48px;
+            font-weight: 400 !important
+        }
+    }
+}

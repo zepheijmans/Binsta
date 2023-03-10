@@ -1,0 +1,14 @@
+$primary: #00a3ff;
+$card-border-width: 0px;
+$card-border-radius: 8px;
+$body-bg: #f4f5f7;
+$btn-hover-bg: #26b1ff;
+$btn-hover-color: black;
+$toast-spacing: 1rem;
+$modal-fade-transform: scale(.8);
+
+@use "sass:meta";
+@import "../../../vendor/twbs/bootstrap/scss/bootstrap.scss";
+@import "../../libs/boxicons-2.1.4/css/boxicons.min.css";
+@import "./common/common.scss";
+@import "./user/user.scss";

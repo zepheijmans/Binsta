@@ -1,0 +1,19 @@
+.profile-actions {
+    top: 8.5rem;
+    right: 1rem;
+    position: absolute;
+
+    .action {
+        border-radius: 100%;
+        background: $primary;
+        color: white;
+        transition: .4s;
+        transform: scale(1.5);
+        cursor: pointer;
+
+        &:hover {
+            background: $btn-hover-bg;
+            color: $btn-hover-color;
+        }
+    }
+}

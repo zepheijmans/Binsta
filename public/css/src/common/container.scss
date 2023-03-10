@@ -1,0 +1,12 @@
+.container {
+    margin-right: auto;
+    margin-left: auto;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+@include media-breakpoint-down(md) {
+    .container {
+        padding: 5px;
+    }
+}

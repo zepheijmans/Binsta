@@ -1,0 +1,329 @@
+{% extends "layouts/app.twig" %}
+
+{% block title %}Feed{% endblock %}
+{% block head %}
+    {{ parent() }}
+{% endblock %}
+{% block content %}
+    <div class="container col-md-6" id="feed">
+
+    </div>
+
+    <div class="container text-center mb-3">
+        <div class="spinner-border" role="status" id="feedLoading">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <div class="d-none" id="endOfScroll">
+            <p>You're up to date!<br>Couldn't find any new posts.</p>
+        </div>
+    </div>
+
+    <div class="modal fade" id="pageModal" tabindex="-1" aria-labelledby="pageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-md modal-fullscreen-md-down modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="pageModalLabel">Label</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    
+                </div>
+                <div class="modal-footer">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script src="/libs/highlight.js-11.6.0/highlight.min.js"></script>
+
+    <script>
+        const feed = $('#feed');
+        const pageModal = $('#pageModal');
+        const pageModalTitle = pageModal.find('.modal-title');
+        const pageModalBody = pageModal.find('.modal-body');
+        const pageModalFooter = pageModal.find('.modal-footer');
+        let posts = 0;
+
+        function toggleLike(elem, status) {
+            if (status) {
+                elem.removeClass('bx-heart');
+                elem.addClass('bxs-heart');
+            } else {
+                elem.addClass('bx-heart');
+                elem.removeClass('bxs-heart');
+            }
+        }
+
+        function markupPost(post) {
+            post.like_status = eval(post.like_status);
+            post.like_activeClass = post.like_status ? 'active' : 'disabled';
+            post.like_icon = post.like_status ? 'bx bxs-heart' : 'bx bx-heart';
+
+            return `
+                <div class="post card mb-4" postid=${post.id}>
+                    <div class="card-body">
+                        <a class="card-title" id="username" href="/user/profile/${post.author.id}">${post.author.username}</a>
+                    </div>
+                    <div class="post-content code" theme="${post.theme}">
+                        <pre><code class="language-${post.language}"></code></pre>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="stats">
+                            <div class="stat ${post.like_activeClass}" id="likes">
+                                <i class="${post.like_icon}"></i>
+                                <span class="text-dark" ><span id="count">${post.likes_count}</span> likes</span>
+                            </div>
+                            <div class="stat ms-4" id="comments">
+                                <i class="bx bx-chat"></i>
+                                <span class="text-dark"><span id="count">${post.comments_count}</span> comments</span>
+                            </div>
+                            <div class="stat ms-4" id="fork">
+                                <i class="bx bx-git-repo-forked"></i>
+                                <span class="text-dark ms-4">Fork</span>
+                            </div>
+                        </div>
+                        <div class="caption">
+                            <a class="text-dark" href="/user/profile/${post.author.id}">${post.author.username}</a><span class="caption-text">${post.caption}</span>
+                            <p class="post-created text-muted mb-0">${post.date_created}</p>
+                        </div>
+                    </div>
+                    <div class="post-comment card-footer">
+                        <input type="text" name="comment" placeholder="Post a comment..." id="comment"></input>
+                        <a class="post-comment-submit">Post</a>
+                    </div>
+                </div>
+            `
+        };
+
+        function getPosts(offset, amount = 5) {
+            ajaxSend('/post/getPosts', 'POST',
+                {
+                    'offset': offset,
+                    'amount': amount
+                },
+                function (response) {
+                    let newPosts = {};
+                    Object.keys(response.posts).map(id => {
+                        feed.prepend(markupPost(response.posts[id]));
+                        newPosts[id] = feed.last();
+                        const post = $(`.post[postid=${id}]`);
+                        post.find('code').html(htmlEncode(response.posts[id].content));
+                        makePostActive(id, post);
+                    });
+                    if (Object.values(newPosts).length < amount) {
+                        $('#feedLoading').hide()
+                        $('#endOfScroll').removeClass('d-none');
+                        $(window).unbind('scroll');
+                    } else {
+                        posts += amount;
+                    }
+                },
+            );
+        }
+
+        getPosts(posts, config.fetch_amount);
+
+        // Fetch new posts on end of scroll
+        $(window).scroll(function() {
+            if (Math.ceil($(window).scrollTop() + $(window).height()) >= $(document).height() - 50) {
+                getPosts(posts, config.fetch_amount);
+            }
+        });
+
+        // Helper functions
+        function markupComment(authorID, authorAvatar, authorUsername, comment, commentTime) {
+            return `
+                <div class="comment">
+                    <img class="avatar" src="${authorAvatar}">
+                    <div class="comment-body">
+                        <a href="/user/profile/${authorID}">@${authorUsername}</a>
+                        <p>${comment}</p>
+                        <div class="comment-meta">
+                            <span class="text-muted">${commentTime}</span>
+                        </div>
+                    </div>
+                </div>
+            `
+        }
+
+        function postComment(postID, input, successCallback) {
+            ajaxSend(`/post/commentPost?id=${postID}`, 'POST',
+                {
+                    "comment": input.val()
+                },
+                function (response) {
+                    input.val('');
+                    if (successCallback) successCallback(response);
+                    return addToast("Success", "Posted comment successfully", "success");
+                },
+            );
+        }
+
+        function makePostActive(id, post) {
+            const time = post.find('.post-created');
+            time.html(niceTime(Date.now()/1000 - parseInt(time.text())) + ' ago');
+
+            // Like post
+            post.find('#likes i').click(function() {
+                const status = !$(this).parent().hasClass('active');
+
+                if (status) {
+                    $(this).parent().addClass('active');
+                } else {
+                    $(this).parent().removeClass('active');
+                }
+
+                toggleLike($(this), status); // makes icon filled
+
+                const likeCounter = post.find('#likes #count');
+                likeCounter.html(parseInt(likeCounter.html()) + (status ? 1 : -1)); // increment/subtract the counter
+
+                ajaxSend('/post/likePost', 'POST',
+                    {
+                        "id": id,
+                        "status": status
+                    }
+                );
+            });
+
+            // View likes
+            post.find('#likes span').click(function() {
+                ajaxSend(`/post/getLikes?id=${id}`, 'GET', null,
+                    function(response) {
+                        pageModal.modal('show');
+
+                        pageModalTitle.html('Liked by');
+                        pageModalBody.html('<div class="user-list"></div>'); // Clear previous body
+                        pageModalFooter.html('') // Clear previous footer
+
+                        let likesCount = 0;
+                        Object.keys(response.likes).map((user) => {
+                            if (!eval(response.likes[user])) return;
+                            pageModalBody.find('.user-list').append(`
+                                <div class="user-list-item">
+                                    <img class="avatar" src="${response.likes_meta[user].avatar}">
+                                    <a href="/user/profile/${user}">@${response.likes_meta[user].username}</a>
+                                </div>
+                            `)
+                            likesCount++;
+                        });
+
+                        if (likesCount < 1) return pageModalBody.html(`<div class="text-center fs-10"><span>(╯°□°）╯︵ ┻━┻</span><p class="mt-4">Nobody liked this post yet...</p></div>`);
+                    }
+                );
+            })
+
+            // View comments
+            let comments = 0;
+
+            function getComments(offset, amount = 5) {
+                ajaxSend(`/post/getComments?id=${id}`, 'POST',
+                    {
+                        'offset': offset,
+                        'amount': amount
+                    },
+                    function(response) {
+                        pageModal.modal('show');
+                        pageModalTitle.html('Comments');
+
+                        pageModalFooter.html(`
+                            <div class="post-comment flex-grow-1">
+                                <input type="text" name="comment" placeholder="Post a comment..." id="comment"></input>
+                                <a class="post-comment-submit">Post</a>
+                            </div>
+                        `)
+
+                        const fetchedComments = Object.keys(response.comments).length;
+
+                        pageModalFooter.find('.post-comment-submit').click(function() {
+                            const comment = $(this).parent().find('#comment').val();
+                            postComment(id, $(this).parent().find('#comment'), function() {
+                                pageModalBody.prepend(markupComment(
+                                    {{user.id}},
+                                    "{{user.avatar}}",
+                                    "{{user.username}}",
+                                    comment,
+                                    niceTime(0) + " ago"
+                                ));
+                            })
+                        })
+
+                        // First time initialize scroll event
+                        if (comments == 0) {
+                            pageModalBody.scroll(function() {
+                                if (Math.ceil(pageModalBody.scrollTop() + pageModalBody.innerHeight()) >= pageModalBody[0].scrollHeight - 50) {
+                                    // Show loading indicator
+                                    pageModalBody.append(`<div class="text-center" id="comments-load"><div class="spinner-border text-dark" role="status"><span class="visually-hidden">Loading...</span></div></div>`)
+                                    
+                                    // Fetch new comments
+                                    getComments(comments, config.fetch_amount);
+                                }
+                            });
+                        }
+
+                        Object.values(response.comments).map(comment => {
+                            comment.date_posted = niceTime(Date.now()/1000 - comment.date_posted) + " ago";
+                            pageModalBody.append(markupComment(
+                                comment.author,
+                                response.comments_meta[comment.author].avatar,
+                                response.comments_meta[comment.author].username,
+                                comment.comment,
+                                comment.date_posted
+                            ));
+                            comments++;
+                        });
+
+                        pageModalBody.find('#comments-load').remove();
+
+                        if (comments == 0 && fetchedComments < 1) {
+                            return pageModalBody.html('No comments found.')
+                        } else if (fetchedComments < amount) {
+                            pageModalBody.unbind('scroll');
+                        };
+                    }
+                );
+            }
+
+            // Reset
+            pageModal.on('hidden.bs.modal', function () {
+                comments = 0;
+            });
+
+            post.find('#comments').click(function() {
+                pageModalBody.html('');
+                getComments(comments, config.fetch_amount)
+            });
+
+            // Post comment
+            post.find('.post-comment-submit').click(function() { postComment(id, post.find('#comment')) });
+
+            // Fork post
+            post.find('#fork').click(function() {
+                confirmAction(function(){
+                    ajaxSend(`/post/forkPost`, 'POST', 
+                        {
+                            "id": id
+                        },
+                        function(response) {
+                            addToast("Success", "Post forked successfully", "success");
+                        }
+                    );
+                },'Fork', 'Are you sure you want to fork this post?');
+            });
+
+            // Like hover animation
+            post.find('.stats #likes i').hover(function() {
+                toggleLike($(this), true)
+            }, function() {
+                if (!$(this).parent().hasClass('active')) {
+                    toggleLike($(this), false)
+                }
+            })
+
+            hljs.highlightAll();
+        }
+    </script>
+{% endblock %}

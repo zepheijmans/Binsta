@@ -1,0 +1,32 @@
+.comment {
+    position: relative;
+    padding: .5rem;
+
+    .avatar {
+        position: absolute;
+        width: 32px;
+        height: 32px;
+    }
+
+    .comment-body {
+        margin-left: 2.5rem;
+        overflow: hidden;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+
+        a {
+            margin-right: .25rem;
+            color: black;
+            font-weight: 500;
+        }
+
+        p {
+            margin: 0px;
+        }
+
+        .comment-meta {
+            width: 100%;
+        }
+    }
+}

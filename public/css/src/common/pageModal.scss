@@ -1,0 +1,11 @@
+#pageModal {
+    margin-top: 25vh;
+    max-height: 50vh;
+}
+
+@include media-breakpoint-down(lg) {
+    #pageModal {
+        margin-top: unset;
+        max-height: unset;
+    }
+}

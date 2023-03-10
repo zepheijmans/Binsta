@@ -1,0 +1,14 @@
+{% extends "layouts/app.twig" %}
+
+{% block content %}
+    {% block profilebefore %} {% endblock %}
+
+    <div class="container col-md-6">
+        <div class="card profile">
+            {% block profilebody %} {% endblock %}
+        </div>
+        {% block profilecontent %} {% endblock %}
+    </div>
+
+    {% block profileafter %} {% endblock %}
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "layouts/app.twig" %}
+
+{% block title %}Forks{% endblock %}
+{% block head %}
+    {{ parent() }}
+{% endblock %}
+{% block content %}
+    <div id="forks" class="container col-md-6">
+        {% if forks|length < 1 %}
+            <div class="text-center">
+                <p>No forks found.</p>
+            </div>
+        {% endif %}
+        {% for fork in forks %}
+            <div class="post card mb-4" fork-id={{fork.id}}>
+                <div class="card-body">
+                    <span class=" card-titletext-muted m-0">Fork from <a href="/user/profile/{{fork.author}}">@{{fork.author_username}}</a></span>
+                </div>
+                <div class="post-content code" theme="{{fork.theme}}">
+                    <pre><code class="language-{{fork.language}}">{{fork.content}}</code></pre>
+                </div>
+                <div class="card-body">
+                    <div class="stats mt-0">
+                        <div class="stat">
+                            <i class="bx bx-trash"></i>
+                            <span class="text-dark ms-4 post-remove">Delete</span>
+                        </div>
+                    </div>
+                    <div class="caption">
+                        <p class="fork-created text-muted mb-0">{{fork.date_forked}}</p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $('code').html(htmlDecode($('code').html()));
+        $('.fork-created').html(niceTime(Date.now()/1000 - $('.fork-created').html()) + " ago")
+        $('.post-remove').click(function() {
+            confirmAction(function(){
+                const id = $('.card').attr('fork-id');
+
+                ajaxSend('/post/forkDelete', 'POST',
+                    {
+                        "id": id
+                    },
+                    function(response) {
+                        $(`.post[fork-id="${id}"]`).remove();
+                        return addToast("Success", "Fork deleted successfully", "success");
+                    }
+                );
+            },'Delete Fork', 'Are you sure you want to delete this fork?');
+        })
+    </script>
+
+    <script src="/libs/highlight.js-11.6.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+{% endblock %}

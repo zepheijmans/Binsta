@@ -1,0 +1,25 @@
+.login-container {
+    margin: 0 auto;
+
+    h3 {
+        text-align: center;
+    }
+}
+
+@include media-breakpoint-up(xl) {
+    .login-container {
+        width: 870px;
+    }
+}
+
+@include media-breakpoint-up(lg) {
+    .login-container {
+        width: 570px;
+    }
+}
+
+@include media-breakpoint-up(sm) {
+    .login-container {
+        width: 570px;
+    }
+}

@@ -1,0 +1,98 @@
+{% extends "layouts/app.twig" %}
+
+{% block title %}Post{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+
+    <link rel="stylesheet" href="/libs/code-input-1.1.1/code-input.min.css">
+{% endblock %}
+
+{% block content %}
+    <div class="container col-md-6">
+        <div class="post card">
+            <div class="card-body">
+                <h3 class="m-0">Create new post</h3>
+                <div id="actions" class="row col-md-6 justify-content-center">
+                    <div class="col-md-6">
+                        <select name="language" id="language-select" class="form-control">
+                            <option>Choose language...</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <select name="language" id="theme-select" class="form-control">
+                            <option>Choose theme...</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <code-input lang="html" placeholder="Type code here..." template="syntax-highlighted" class="code p-0 m-0 w-100" theme="default"></code-input>
+            <div class="post-comment card-footer">
+                <input id="post-caption" type="text" name="comment" placeholder="Type caption here..."></input>
+                <a id="post-submit" class="post-comment-submit">Post</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script src="/libs/code-input-1.1.1/code-input.min.js"></script>
+    {# <script src="/libs/code-input-1.1.1/plugins/autodetect.min.js"></script> #}
+    <script src="/libs/code-input-1.1.1/plugins/indent.min.js"></script>
+    <script src="/libs/highlight.js-11.6.0/highlight.min.js"></script>
+
+    <script>
+        if (getTheme() == "dark") {
+            $('code-input').attr('theme', 'dark')
+        }
+
+        let languages = hljs.listLanguages();
+        languages.push('html');
+        const languageSelect = $('#language-select');
+
+        languages.map(function(language) {
+            languageSelect.append(`<option value="${language}">${language}</option>`)
+        })
+
+        languageSelect.change(function() {
+            const newLanguage = $(this).val();
+            $('code-input').attr('lang', newLanguage);
+            if (newLanguage != "xml") {
+                $('code-input').find('code').removeClass('language-xml');
+            }
+            $('code-input').find('textarea').trigger('oninput');
+        })
+
+        const themeSelect = $('#theme-select');
+        config.themes.map(function(theme) {
+            themeSelect.append(`<option value="${theme}">${theme}</option>`)
+        })
+        themeSelect.change(function() {
+            $('.code').attr('theme', $(this).val());
+        });
+
+        $('#post-submit').click(function() {
+            ajaxSend('/post/createPost', 'POST', 
+                {
+                    language: $('#language-select').val(),
+                    theme: $('#theme-select').val(),
+                    caption: $('#post-caption').val(),
+                    content: $('code-input pre code').text()
+                },
+                function(response) {
+                    return window.location.href = "/";
+                }
+            );
+        })
+
+        codeInput.registerTemplate("syntax-highlighted", 
+            codeInput.templates.hljs(
+                hljs, 
+                [
+                    {# new codeInput.plugins.Autodetect(), #}
+                    new codeInput.plugins.Indent()
+                ]
+            )
+        );
+    </script>
+{% endblock %}

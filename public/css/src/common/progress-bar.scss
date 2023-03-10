@@ -1,0 +1,9 @@
+#progress-bar {
+    position: fixed;
+    width: 100%;
+    height: 3px;
+    background: #29d;
+    box-shadow: 0 0 10px #29d, 0 0 5px #29d;
+    border-radius: 3px;
+    z-index: 9999;
+}
